@@ -10,235 +10,142 @@ public class EmployeeMain {
 
     public static void main(String[] args) {
 
-        Scanner scanner = new Scanner(System.in);
-
-        EmployeeDAO employeeDAO = new EmployeeDAO();
+        EmployeeDAO dao = new EmployeeDAO();
+        Scanner sc = new Scanner(System.in);
 
         while (true) {
 
-            System.out.println();
-            System.out.println("================================");
-            System.out.println("       EMPLOYEE MANAGEMENT");
-            System.out.println("================================");
-
+            System.out.println("\n===== BUSINESS EXPENSES TRACKER =====");
             System.out.println("1. Add Employee");
             System.out.println("2. View Employees");
-            System.out.println("3. Update Employee");
-            System.out.println("4. Delete Employee");
-            System.out.println("5. Exit");
+            System.out.println("3. Find Employee by ID");
+            System.out.println("4. Update Employee");
+            System.out.println("5. Delete Employee");
+            System.out.println("6. Exit");
+            System.out.print("Enter your choice: ");
 
-            System.out.print("Enter choice: ");
+            int choice = sc.nextInt();
+            sc.nextLine();
 
-            int choice = scanner.nextInt();
-            scanner.nextLine();
+            switch (choice) {
 
+                case 1:
+                    System.out.print("Enter Role ID: ");
+                    Long roleId = sc.nextLong();
 
-            // =================================================
-            // 1. ADD EMPLOYEE
-            // =================================================
+                    System.out.print("Enter Department ID: ");
+                    Long departmentId = sc.nextLong();
+                    sc.nextLine();
 
-            if (choice == 1) {
+                    System.out.print("Enter Name: ");
+                    String name = sc.nextLine();
 
-                System.out.println();
-                System.out.println("===== ADD EMPLOYEE =====");
+                    System.out.print("Enter Email: ");
+                    String email = sc.nextLine();
 
-                System.out.print("Enter Role ID: ");
-                long roleId = scanner.nextLong();
+                    System.out.print("Enter Phone: ");
+                    String phone = sc.nextLine();
 
-                System.out.print("Enter Department ID: ");
-                long departmentId = scanner.nextLong();
+                    System.out.print("Enter Designation: ");
+                    String designation = sc.nextLine();
 
-                scanner.nextLine();
+                    Employee employee = new Employee(
+                            roleId,
+                            departmentId,
+                            name,
+                            email,
+                            phone,
+                            designation
+                    );
 
-                System.out.print("Enter Name: ");
-                String name = scanner.nextLine();
+                    dao.addEmployee(employee);
+                    break;
 
-                System.out.print("Enter Email: ");
-                String email = scanner.nextLine();
+                case 2:
+                    List<Employee> employees = dao.getAllEmployees();
 
-                System.out.print("Enter Phone: ");
-                String phone = scanner.nextLine();
+                    System.out.println("\n===== EMPLOYEE LIST =====");
 
-                System.out.print("Enter Designation: ");
-                String designation = scanner.nextLine();
-
-
-                Employee employee = new Employee(
-                        roleId,
-                        departmentId,
-                        name,
-                        email,
-                        phone,
-                        designation
-                );
-
-                employeeDAO.addEmployee(employee);
-            }
-
-
-            // =================================================
-            // 2. VIEW EMPLOYEES
-            // =================================================
-
-            else if (choice == 2) {
-
-                System.out.println();
-                System.out.println("===== EMPLOYEE LIST =====");
-
-                List<Employee> employees =
-                        employeeDAO.getAllEmployees();
-
-                if (employees.isEmpty()) {
-
-                    System.out.println("No employees found.");
-
-                } else {
-
-                    for (Employee employee : employees) {
-
-                        System.out.println();
-                        System.out.println("----------------------------");
-
-                        System.out.println(
-                                "Employee ID   : "
-                                        + employee.getId()
-                        );
-
-                        System.out.println(
-                                "Role ID       : "
-                                        + employee.getRoleId()
-                        );
-
-                        System.out.println(
-                                "Department ID : "
-                                        + employee.getDepartmentId()
-                        );
-
-                        System.out.println(
-                                "Name          : "
-                                        + employee.getName()
-                        );
-
-                        System.out.println(
-                                "Email         : "
-                                        + employee.getEmail()
-                        );
-
-                        System.out.println(
-                                "Phone         : "
-                                        + employee.getPhone()
-                        );
-
-                        System.out.println(
-                                "Designation   : "
-                                        + employee.getDesignation()
-                        );
-
-                        System.out.println(
-                                "----------------------------"
-                        );
+                    if (employees.isEmpty()) {
+                        System.out.println("No employees found.");
+                    } else {
+                        for (Employee emp : employees) {
+                            System.out.println(emp);
+                        }
                     }
-                }
-            }
+                    break;
 
+                case 3:
+                    System.out.print("Enter Employee ID: ");
+                    Long findId = sc.nextLong();
 
-            // =================================================
-            // 3. UPDATE EMPLOYEE
-            // =================================================
+                    Employee found = dao.getEmployeeById(findId);
 
-            else if (choice == 3) {
+                    if (found != null) {
+                        System.out.println("Employee Found:");
+                        System.out.println(found);
+                    } else {
+                        System.out.println("Employee not found.");
+                    }
+                    break;
 
-                System.out.println();
-                System.out.println("===== UPDATE EMPLOYEE =====");
+                case 4:
+                    System.out.print("Enter Employee ID to update: ");
+                    Long updateId = sc.nextLong();
 
-                System.out.print("Enter Employee ID to update: ");
+                    System.out.print("Enter Role ID: ");
+                    Long updateRoleId = sc.nextLong();
 
-                long id = scanner.nextLong();
-                scanner.nextLine();
+                    System.out.print("Enter Department ID: ");
+                    Long updateDepartmentId = sc.nextLong();
+                    sc.nextLine();
 
+                    System.out.print("Enter Name: ");
+                    String updateName = sc.nextLine();
 
-                // First check whether ID exists
-                Employee existingEmployee =
-                        employeeDAO.getEmployeeById(id);
+                    System.out.print("Enter Email: ");
+                    String updateEmail = sc.nextLine();
 
+                    System.out.print("Enter Phone: ");
+                    String updatePhone = sc.nextLine();
 
-                if (existingEmployee == null) {
+                    System.out.print("Enter Designation: ");
+                    String updateDesignation = sc.nextLine();
 
-                    System.out.println("Employee ID not found!");
+                    Employee updatedEmployee = new Employee(
+                            updateRoleId,
+                            updateDepartmentId,
+                            updateName,
+                            updateEmail,
+                            updatePhone,
+                            updateDesignation
+                    );
 
-                } else {
+                    updatedEmployee.setId(updateId);
 
-                    System.out.print("Enter New Name: ");
-                    String name = scanner.nextLine();
+                    dao.updateEmployee(updatedEmployee);
+                    break;
 
-                    System.out.print("Enter New Email: ");
-                    String email = scanner.nextLine();
+                case 5:
+                    System.out.print("Enter Employee ID to delete: ");
+                    Long deleteId = sc.nextLong();
 
-                    System.out.print("Enter New Phone: ");
-                    String phone = scanner.nextLine();
+                    dao.deleteEmployee(deleteId);
+                    break;
 
-                    System.out.print("Enter New Designation: ");
-                    String designation = scanner.nextLine();
+                case 6:
+                    System.out.println("Application closed.");
+                    sc.close();
+                    HibernateUtilShutdown();
+                    return;
 
-
-                    Employee employee = new Employee();
-
-                    employee.setId(id);
-                    employee.setName(name);
-                    employee.setEmail(email);
-                    employee.setPhone(phone);
-                    employee.setDesignation(designation);
-
-
-                    employeeDAO.updateEmployee(employee);
-                }
-            }
-
-
-            // =================================================
-            // 4. DELETE EMPLOYEE
-            // =================================================
-
-            else if (choice == 4) {
-
-                System.out.println();
-                System.out.println("===== DELETE EMPLOYEE =====");
-
-                System.out.print("Enter Employee ID to delete: ");
-
-                long id = scanner.nextLong();
-                scanner.nextLine();
-
-
-                employeeDAO.deleteEmployee(id);
-            }
-
-
-            // =================================================
-            // 5. EXIT
-            // =================================================
-
-            else if (choice == 5) {
-
-                System.out.println();
-                System.out.println("Thank you!");
-
-                scanner.close();
-
-                break;
-            }
-
-
-            // =================================================
-            // INVALID CHOICE
-            // =================================================
-
-            else {
-
-                System.out.println(
-                        "Invalid choice! Please enter 1 to 5."
-                );
+                default:
+                    System.out.println("Invalid choice!");
             }
         }
+    }
+
+    private static void HibernateUtilShutdown() {
+        com.expensetracker.util.HibernateUtil.shutdown();
     }
 }

@@ -1,21 +1,43 @@
- package com.expensetracker.model;
+package com.expensetracker.model;
 
+import jakarta.persistence.*;
+
+@Entity
+@Table(name = "employees")
 public class Employee {
 
-    private long id;
-    private long roleId;
-    private long departmentId;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id")
+    private Long id;
+
+    @Column(name = "role_id")
+    private Long roleId;
+
+    @Column(name = "department_id")
+    private Long departmentId;
+
+    @Column(name = "name")
     private String name;
+
+    @Column(name = "email")
     private String email;
+
+    @Column(name = "phone")
     private String phone;
+
+    @Column(name = "designation")
     private String designation;
 
+
+    // Default Constructor
     public Employee() {
     }
 
-    public Employee(long roleId, long departmentId,
-                    String name, String email,
-                    String phone, String designation) {
+
+    // Constructor without ID
+    public Employee(Long roleId, Long departmentId, String name,
+                    String email, String phone, String designation) {
 
         this.roleId = roleId;
         this.departmentId = departmentId;
@@ -25,30 +47,38 @@ public class Employee {
         this.designation = designation;
     }
 
-    public long getId() {
+
+    // Getter and Setter for ID
+    public Long getId() {
         return id;
     }
 
-    public void setId(long id) {
+    public void setId(Long id) {
         this.id = id;
     }
 
-    public long getRoleId() {
+
+    // Getter and Setter for Role ID
+    public Long getRoleId() {
         return roleId;
     }
 
-    public void setRoleId(long roleId) {
+    public void setRoleId(Long roleId) {
         this.roleId = roleId;
     }
 
-    public long getDepartmentId() {
+
+    // Getter and Setter for Department ID
+    public Long getDepartmentId() {
         return departmentId;
     }
 
-    public void setDepartmentId(long departmentId) {
+    public void setDepartmentId(Long departmentId) {
         this.departmentId = departmentId;
     }
 
+
+    // Getter and Setter for Name
     public String getName() {
         return name;
     }
@@ -57,6 +87,8 @@ public class Employee {
         this.name = name;
     }
 
+
+    // Getter and Setter for Email
     public String getEmail() {
         return email;
     }
@@ -65,6 +97,8 @@ public class Employee {
         this.email = email;
     }
 
+
+    // Getter and Setter for Phone
     public String getPhone() {
         return phone;
     }
@@ -73,11 +107,29 @@ public class Employee {
         this.phone = phone;
     }
 
+
+    // Getter and Setter for Designation
     public String getDesignation() {
         return designation;
     }
 
     public void setDesignation(String designation) {
         this.designation = designation;
+    }
+
+
+    // toString()
+    @Override
+    public String toString() {
+
+        return "Employee{" +
+                "id=" + id +
+                ", roleId=" + roleId +
+                ", departmentId=" + departmentId +
+                ", name='" + name + '\'' +
+                ", email='" + email + '\'' +
+                ", phone='" + phone + '\'' +
+                ", designation='" + designation + '\'' +
+                '}';
     }
 }

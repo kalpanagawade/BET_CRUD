@@ -1,46 +1,38 @@
 package com.expensetracker.dao;
 
 import com.expensetracker.model.Employee;
-import com.expensetracker.util.DBConnection;
+import com.expensetracker.util.HibernateUtil;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.ArrayList;
+import org.hibernate.Session;
+import org.hibernate.Transaction;
+
 import java.util.List;
 
 public class EmployeeDAO {
 
-    // =========================================================
+    // =========================
     // CREATE - ADD EMPLOYEE
-    // =========================================================
-
+    // =========================
     public void addEmployee(Employee employee) {
 
-        String sql = "INSERT INTO employees " +
-                "(role_id, department_id, name, email, phone, designation) " +
-                "VALUES (?, ?, ?, ?, ?, ?)";
+        Transaction transaction = null;
 
-        try (
-                Connection connection = DBConnection.getConnection();
-                PreparedStatement ps = connection.prepareStatement(sql)
-        ) {
+        try (Session session =
+                     HibernateUtil.getSessionFactory().openSession()) {
 
-            ps.setLong(1, employee.getRoleId());
-            ps.setLong(2, employee.getDepartmentId());
-            ps.setString(3, employee.getName());
-            ps.setString(4, employee.getEmail());
-            ps.setString(5, employee.getPhone());
-            ps.setString(6, employee.getDesignation());
+            transaction = session.beginTransaction();
 
-            int rows = ps.executeUpdate();
+            session.persist(employee);
 
-            if (rows > 0) {
-                System.out.println("Employee added successfully!");
+            transaction.commit();
+
+            System.out.println("Employee added successfully!");
+
+        } catch (Exception e) {
+
+            if (transaction != null) {
+                transaction.rollback();
             }
-
-        } catch (SQLException e) {
 
             System.out.println("Error while adding employee:");
             e.printStackTrace();
@@ -48,164 +40,161 @@ public class EmployeeDAO {
     }
 
 
-    // =========================================================
+    // =========================
     // READ - VIEW ALL EMPLOYEES
-    // =========================================================
-
+    // =========================
     public List<Employee> getAllEmployees() {
 
-        List<Employee> employees = new ArrayList<>();
+        try (Session session =
+                     HibernateUtil.getSessionFactory().openSession()) {
 
-        String sql = "SELECT id, role_id, department_id, " +
-                "name, email, phone, designation " +
-                "FROM employees";
+            return session
+                    .createQuery(
+                            "FROM Employee",
+                            Employee.class
+                    )
+                    .getResultList();
 
-        try (
-                Connection connection = DBConnection.getConnection();
-                PreparedStatement ps = connection.prepareStatement(sql);
-                ResultSet rs = ps.executeQuery()
-        ) {
-
-            while (rs.next()) {
-
-                Employee employee = new Employee();
-
-                employee.setId(rs.getLong("id"));
-                employee.setRoleId(rs.getLong("role_id"));
-                employee.setDepartmentId(rs.getLong("department_id"));
-                employee.setName(rs.getString("name"));
-                employee.setEmail(rs.getString("email"));
-                employee.setPhone(rs.getString("phone"));
-                employee.setDesignation(rs.getString("designation"));
-
-                employees.add(employee);
-            }
-
-        } catch (SQLException e) {
+        } catch (Exception e) {
 
             System.out.println("Error while viewing employees:");
             e.printStackTrace();
-        }
 
-        return employees;
+            return List.of();
+        }
     }
 
 
-    // =========================================================
-    // READ - FIND EMPLOYEE BY ID
-    // =========================================================
+    // =========================
+    // READ - FIND BY ID
+    // =========================
+    public Employee getEmployeeById(Long id) {
 
-    public Employee getEmployeeById(long id) {
+        try (Session session =
+                     HibernateUtil.getSessionFactory().openSession()) {
 
-        String sql = "SELECT id, role_id, department_id, " +
-                "name, email, phone, designation " +
-                "FROM employees WHERE id = ?";
+            return session.get(Employee.class, id);
 
-        try (
-                Connection connection = DBConnection.getConnection();
-                PreparedStatement ps = connection.prepareStatement(sql)
-        ) {
-
-            ps.setLong(1, id);
-
-            try (ResultSet rs = ps.executeQuery()) {
-
-                if (rs.next()) {
-
-                    Employee employee = new Employee();
-
-                    employee.setId(rs.getLong("id"));
-                    employee.setRoleId(rs.getLong("role_id"));
-                    employee.setDepartmentId(rs.getLong("department_id"));
-                    employee.setName(rs.getString("name"));
-                    employee.setEmail(rs.getString("email"));
-                    employee.setPhone(rs.getString("phone"));
-                    employee.setDesignation(rs.getString("designation"));
-
-                    return employee;
-                }
-            }
-
-        } catch (SQLException e) {
+        } catch (Exception e) {
 
             System.out.println("Error while finding employee:");
             e.printStackTrace();
-        }
 
-        return null;
+            return null;
+        }
     }
 
 
-    // =========================================================
-    // UPDATE - UPDATE EMPLOYEE
-    // =========================================================
+    // =========================
+    // UPDATE EMPLOYEE
+    // =========================
+    public boolean updateEmployee(Employee employee) {
 
-    public void updateEmployee(Employee employee) {
+        Transaction transaction = null;
 
-        String sql = "UPDATE employees SET " +
-                "name = ?, email = ?, phone = ?, designation = ? " +
-                "WHERE id = ?";
+        try (Session session =
+                     HibernateUtil.getSessionFactory().openSession()) {
 
-        try (
-                Connection connection = DBConnection.getConnection();
-                PreparedStatement ps = connection.prepareStatement(sql)
-        ) {
+            transaction = session.beginTransaction();
 
-            ps.setString(1, employee.getName());
-            ps.setString(2, employee.getEmail());
-            ps.setString(3, employee.getPhone());
-            ps.setString(4, employee.getDesignation());
-            ps.setLong(5, employee.getId());
+            Employee existingEmployee =
+                    session.get(Employee.class, employee.getId());
 
-            int rows = ps.executeUpdate();
-
-            if (rows > 0) {
-
-                System.out.println("Employee updated successfully!");
-
-            } else {
+            if (existingEmployee == null) {
 
                 System.out.println("Employee ID not found!");
+
+                transaction.rollback();
+
+                return false;
             }
 
-        } catch (SQLException e) {
+            existingEmployee.setRoleId(
+                    employee.getRoleId()
+            );
+
+            existingEmployee.setDepartmentId(
+                    employee.getDepartmentId()
+            );
+
+            existingEmployee.setName(
+                    employee.getName()
+            );
+
+            existingEmployee.setEmail(
+                    employee.getEmail()
+            );
+
+            existingEmployee.setPhone(
+                    employee.getPhone()
+            );
+
+            existingEmployee.setDesignation(
+                    employee.getDesignation()
+            );
+
+            transaction.commit();
+
+            System.out.println("Employee updated successfully!");
+
+            return true;
+
+        } catch (Exception e) {
+
+            if (transaction != null) {
+                transaction.rollback();
+            }
 
             System.out.println("Error while updating employee:");
             e.printStackTrace();
+
+            return false;
         }
     }
 
 
-    // =========================================================
-    // DELETE - DELETE EMPLOYEE
-    // =========================================================
+    // =========================
+    // DELETE EMPLOYEE
+    // =========================
+    public boolean deleteEmployee(Long id) {
 
-    public void deleteEmployee(long id) {
+        Transaction transaction = null;
 
-        String sql = "DELETE FROM employees WHERE id = ?";
+        try (Session session =
+                     HibernateUtil.getSessionFactory().openSession()) {
 
-        try (
-                Connection connection = DBConnection.getConnection();
-                PreparedStatement ps = connection.prepareStatement(sql)
-        ) {
+            transaction = session.beginTransaction();
 
-            ps.setLong(1, id);
+            Employee employee =
+                    session.get(Employee.class, id);
 
-            int rows = ps.executeUpdate();
-
-            if (rows > 0) {
-
-                System.out.println("Employee deleted successfully!");
-
-            } else {
+            if (employee == null) {
 
                 System.out.println("Employee ID not found!");
+
+                transaction.rollback();
+
+                return false;
             }
 
-        } catch (SQLException e) {
+            session.remove(employee);
+
+            transaction.commit();
+
+            System.out.println("Employee deleted successfully!");
+
+            return true;
+
+        } catch (Exception e) {
+
+            if (transaction != null) {
+                transaction.rollback();
+            }
 
             System.out.println("Error while deleting employee:");
             e.printStackTrace();
+
+            return false;
         }
     }
 }
